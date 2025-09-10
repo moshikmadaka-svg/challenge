@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Electo – 2025 Electronics Dashboard</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f9fafb;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(90deg, #0f172a, #1d4ed8);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header .profile {
+      background: #1d4ed8;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 1rem;
+      padding: 1rem 2rem;
+    }
+    aside {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    aside h2 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .stats p { margin: 0.4rem 0; font-size: 0.9rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .card h3 { margin: 0.5rem 1rem; font-size: 1.1rem; }
+    .card p { margin: 0.5rem 1rem; font-size: 0.9rem; color: #555; }
+    .details {
+      font-size: 0.85rem;
+      margin: 0.5rem 1rem 1rem;
+      color: #444;
+    }
+    model-viewer {
+      width: 100%;
+      height: 250px;
+      background: #111;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Electo – 2025 Electronics Models</h1>
+    <div class="profile">Profile: Electo</div>
+  </header>
+
+  <div class="dashboard">
+    <aside>
+      <h2>Stats</h2>
+      <div class="stats">
+        <p>Total Models: <strong>4</strong></p>
+        <p>Smartphones: <strong>1</strong></p>
+        <p>Laptops: <strong>1</strong></p>
+        <p>Wearables: <strong>1</strong></p>
+        <p>Consoles: <strong>1</strong></p>
+      </div>
+    </aside>
+
+    <main class="grid">
+      <!-- Smartphone -->
+      <div class="card">
+        <model-viewer src="https://modelviewer.dev/shared-assets/models/PixelPhone.glb" alt="Smartphone 2025"
+                      camera-controls auto-rotate></model-viewer>
+        <h3>Electo Phone X1 (2025)</h3>
+        <p>Ultra-thin smartphone with holographic display and AI camera.</p>
+        <div class="details">
+          <p><strong>Specs:</strong> 12-core AI chip, 1TB storage, 8K display</p>
+          <p><strong>Price:</strong> $1299</p>
+        </div>
+      </div>
+
+      <!-- Laptop -->
+      <div class="card">
+        <model-viewer src="https://modelviewer.dev/shared-assets/models/Laptop.glb" alt="Laptop 2025"
+                      camera-controls auto-rotate></model-viewer>
+        <h3>ElectoBook Pro 2025</h3>
+        <p>Lightweight laptop with foldable OLED screen.</p>
+        <div class="details">
+          <p><strong>Specs:</strong> Quantum CPU, 64GB RAM, 3TB SSD</p>
+          <p><strong>Price:</strong> $2499</p>
+        </div>
+      </div>
+
+      <!-- Wearable -->
+      <div class="card">
+        <model-viewer src="https://modelviewer.dev/shared-assets/models/Watch.glb" alt="Smartwatch 2025"
+                      camera-controls auto-rotate></model-viewer>
+        <h3>Electo Watch Z</h3>
+        <p>Next-gen smartwatch with health sensors and 3D hologram UI.</p>
+        <div class="details">
+          <p><strong>Specs:</strong> ECG, Neural UI, solar-charging</p>
+          <p><strong>Price:</strong> $799</p>
+        </div>
+      </div>
+
+      <!-- Console -->
+      <div class="card">
+        <model-viewer src="https://modelviewer.dev/shared-assets/models/RobotExpressive.glb" alt="Gaming Console 2025"
+                      camera-controls auto-rotate></model-viewer>
+        <h3>Electo Console 5X</h3>
+        <p>Next-gen gaming console with VR integration and 12K graphics.</p>
+        <div class="details">
+          <p><strong>Specs:</strong> 20-core GPU, 4TB storage, VR-ready</p>
+          <p><strong>Price:</strong> $999</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
