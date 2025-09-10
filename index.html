@@ -1,185 +1,151 @@
-<!--
-Electo Robots — 2025 Robo Dashboard
-Single-file HTML / CSS / JS dashboard that showcases 10 robot models (2025)
-Features:
-- Responsive modern dashboard layout
-- Category filters and search
-- Cards with details & prices
-- 3D image viewer (Three.js) that shows each robot image on a rotating plane
-- Click a robot to open a profile panel with full specs
-
-Notes for the user:
-- Replace the placeholder image URLs in `robots` array with your own high-res pictures if you want. The current images are sample Unsplash images that demonstrate layout.
-- No backend required — all data lives in the `robots` JS array.
-- You can tweak styles and add real 3D models later (GLTF/GLB) by extending the Three.js viewer.
--->
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Electo Robots — 2025</title>
-  <!-- Three.js CDN -->
+  <title>Electo Robots — 2025 Collection</title>
   <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-  <!-- Optional: OrbitControls (for manual rotate/zoom) -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/controls/OrbitControls.js"></script>
   <style>
-    :root{
-      --bg:#0f1724; --card:#0b1220; --muted:#9aa6bd; --accent:#6ee7b7; --glass:rgba(255,255,255,0.04);
-      --radius:14px; --gap:18px; font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue';
-    }
-    *{box-sizing:border-box}
-    body{margin:0; background:linear-gradient(180deg,#071026 0%, #071a2b 100%); color:#e6eef6;}
-    header{display:flex;align-items:center;gap:18px;padding:20px 28px}
-    .brand{display:flex;align-items:center;gap:14px}
-    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:700;color:#022;box-shadow:0 6px 18px rgba(0,0,0,0.5)}
-    .title{font-size:20px;font-weight:700}
+    :root{--bg:#071124;--card:#0b1320;--muted:#9fb0c8;--accent:#7ef2c8;--glass:rgba(255,255,255,0.03);--radius:16px}
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue'}
+    body{margin:0;background:linear-gradient(180deg,#03101a 0%,#061827 100%);color:#eaf6ff}
+    header{display:flex;align-items:center;gap:16px;padding:22px 28px}
+    .logo{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:800;color:#072}
+    .title{font-size:20px;font-weight:800}
     .subtitle{font-size:12px;color:var(--muted)}
-    .container{display:grid;grid-template-columns:360px 1fr 440px;gap:var(--gap);padding:18px}
 
-    /* left sidebar */
-    .sidebar{background:var(--card);padding:16px;border-radius:12px;min-height:70vh}
-    .search{display:flex;gap:10px;margin-bottom:14px}
-    input[type=text]{flex:1;padding:10px;border-radius:10px;border:none;background:var(--glass);color:inherit}
-    .filter{display:flex;flex-wrap:wrap;gap:8px}
-    .chip{padding:8px 10px;border-radius:999px;background:transparent;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+    .wrap{padding:18px;display:grid;grid-template-columns:300px 1fr 420px;gap:18px}
 
-    /* main */
-    .main{min-height:70vh}
-    .viewer{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding:18px;border-radius:12px;margin-bottom:var(--gap);display:flex;gap:18px}
-    .viewer-canvas{flex:1;min-height:360px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#081728,#051026)}
-    .viewer-info{width:320px;padding:12px}
-    .spec{background:var(--card);padding:12px;border-radius:10px;margin-bottom:12px}
+    /* Sidebar */
+    .sidebar{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:16px;border-radius:var(--radius);min-height:72vh;border:1px solid rgba(255,255,255,0.03)}
+    .search{display:flex;gap:10px}
+    input[type=text]{flex:1;padding:12px;border-radius:12px;border:none;background:var(--glass);color:inherit}
+    .chip{display:inline-block;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);cursor:pointer;margin:6px 6px 0 0}
 
-    .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(220px,1fr));gap:14px}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:transform .18s, box-shadow .18s}
-    .card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
-    .thumb{height:140px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#021022}
+    /* Center */
+    .viewer{display:flex;gap:16px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.02)}
+    #viewerCanvas{flex:1;min-height:380px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#021229,#041022)}
+    .viewer-side{width:340px}
+    .spec{background:var(--card);padding:12px;border-radius:12px;margin-bottom:12px}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:12px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:transform .15s}
+    .card:hover{transform:translateY(-6px)}
+    .thumb{height:160px;border-radius:10px;overflow:hidden;background:#021629;display:flex;align-items:center;justify-content:center}
     .thumb img{width:100%;height:100%;object-fit:cover}
-    .meta{padding-top:10px}
-    .name{font-weight:700}
+    .name{font-weight:700;margin-top:10px}
     .price{color:var(--accent);font-weight:700}
-    .cat{font-size:12px;color:var(--muted)}
+    .cat{color:var(--muted);font-size:13px}
 
-    /* right pane (profile) */
-    .profile{background:var(--card);padding:16px;border-radius:12px;min-height:70vh}
-    .stat-row{display:flex;gap:10px;justify-content:space-between;margin-bottom:8px}
-    .stat{background:var(--glass);padding:8px 10px;border-radius:10px;text-align:center}
+    /* Profile */
+    .profile{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,0.02);min-height:72vh}
+    .profile img{width:100%;border-radius:10px;object-fit:cover}
+    .btn{padding:10px;border-radius:12px;border:none;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#022;font-weight:700}
+    .muted{color:var(--muted)}
 
-    footer{padding:20px;text-align:center;color:var(--muted)}
+    footer{padding:18px;text-align:center;color:var(--muted)}
 
-    /* responsive */
-    @media (max-width:1100px){.container{grid-template-columns:1fr;}.profile{order:3}.sidebar{order:2}.viewer{order:1}}
+    @media (max-width:1100px){.wrap{grid-template-columns:1fr;}.profile{order:3}.sidebar{order:2}.viewer{order:1}}
   </style>
 </head>
 <body>
   <header>
-    <div class="brand">
-      <div class="logo">ER</div>
-      <div>
-        <div class="title">Electo Robots</div>
-        <div class="subtitle">Curated 10 models — 2025 • Explore, compare & demo</div>
-      </div>
+    <div class="logo">ER</div>
+    <div>
+      <div class="title">Electo Robots</div>
+      <div class="subtitle">2025 Collection — 10 New Models • 3D Previews</div>
     </div>
     <div style="flex:1"></div>
-    <div class="subtitle">Dashboard • Live 3D previews • Price & specs</div>
+    <div class="muted">Showcase • Compare • Request Quote</div>
   </header>
 
-  <main class="container">
+  <main class="wrap">
     <!-- LEFT: filters -->
     <aside class="sidebar">
-      <div style="font-weight:700;margin-bottom:8px">Filters & Search</div>
-      <div class="search">
-        <input id="searchInput" type="text" placeholder="Search model or feature" />
-        <button id="clearBtn" title="Clear">✕</button>
-      </div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Categories</div>
-      <div class="filter" id="categoryChips"></div>
-
+      <div style="font-weight:800">Search & Filters</div>
+      <div style="height:10px"></div>
+      <div class="search"><input id="searchInput" placeholder="Search model, category or feature"/><button id="clearBtn" class="btn">✕</button></div>
       <div style="height:14px"></div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Sort</div>
-      <select id="sortSel" style="width:100%;padding:10px;border-radius:10px;background:var(--glass);border:none;color:inherit">
+      <div style="font-weight:700">Categories</div>
+      <div id="categoryChips" style="margin-top:8px"></div>
+
+      <div style="height:12px"></div>
+      <div style="font-weight:700">Sort</div>
+      <select id="sortSel" style="width:100%;padding:10px;border-radius:12px;background:var(--glass);border:none;color:inherit;margin-top:8px">
         <option value="featured">Featured</option>
-        <option value="price-asc">Price — Low to High</option>
-        <option value="price-desc">Price — High to Low</option>
+        <option value="price-asc">Price low → high</option>
+        <option value="price-desc">Price high → low</option>
       </select>
 
-      <div style="height:22px"></div>
-      <div style="font-weight:700;margin-bottom:8px">About Electo Robots</div>
-      <div style="font-size:13px;color:var(--muted)">Electo Robots curates next-gen consumer and industrial robots for 2025 — inspection drones, home assistants, fabrication bots and service robots.</div>
+      <div style="height:18px"></div>
+      <div style="font-weight:700">About</div>
+      <div class="muted" style="font-size:13px;margin-top:6px">Electo Robots curates leading consumer, industrial, and specialty robots for 2025. Replace sample images with your own for production.</div>
     </aside>
 
-    <!-- CENTER: viewer + grid -->
-    <section class="main">
+    <!-- CENTER: viewer + models -->
+    <section>
       <div class="viewer">
-        <div class="viewer-canvas" id="viewerCanvas"></div>
-        <div class="viewer-info">
-          <div class="spec" id="selectedTitle">Select a robot to preview</div>
-          <div class="spec" id="selectedDesc">Click any card on the right to load a 3D preview and full specs here. The 3D viewer maps the product image onto a rotating plane; consider replacing images with GLB files for richer 3D.</div>
+        <div id="viewerCanvas"></div>
+        <div class="viewer-side">
+          <div id="selectedTitle" class="spec">Select a robot to preview</div>
+          <div id="selectedDesc" class="spec">Click a card below to load a 3D preview, specs and pricing. The viewer maps the robot image onto a 3D plane; you can later upgrade to real GLB models.</div>
+
           <div class="spec">
-            <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Quick stats</div>
-            <div class="stat-row">
-              <div class="stat"><div style="font-size:12px;color:var(--muted)">Avg Price</div><div id="statAvg" style="font-weight:700">—</div></div>
-              <div class="stat"><div style="font-size:12px;color:var(--muted)">Categories</div><div id="statCats" style="font-weight:700">—</div></div>
-            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Collection Summary</div>
+            <div style="display:flex;justify-content:space-between;gap:8px"><div style="flex:1;background:var(--glass);padding:10px;border-radius:10px;text-align:center"><div class="muted">Avg Price</div><div id="statAvg" style="font-weight:800;margin-top:6px">—</div></div><div style="width:10px"></div><div style="flex:1;background:var(--glass);padding:10px;border-radius:10px;text-align:center"><div class="muted">Categories</div><div id="statCats" style="font-weight:800;margin-top:6px">—</div></div></div>
           </div>
+
         </div>
       </div>
 
-      <div style="font-weight:700;margin-bottom:10px">Models — 2025</div>
-      <div class="grid" id="cardsGrid">
-        <!-- cards inserted via JS -->
-      </div>
+      <div style="font-weight:800;margin-top:12px">Models — 2025</div>
+      <div class="grid" id="cardsGrid"></div>
     </section>
 
-    <!-- RIGHT: profile / details -->
+    <!-- RIGHT: profile -->
     <aside class="profile">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-        <div style="width:72px;height:72px;border-radius:12px;background:#061423;display:flex;align-items:center;justify-content:center;font-weight:700">ER</div>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+        <div style="width:72px;height:72px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:800;color:#022">ER</div>
         <div>
-          <div style="font-weight:700">Electo Robots — Profile</div>
-          <div style="font-size:12px;color:var(--muted)">2025 Collection • 10 models</div>
+          <div style="font-weight:800">Electo Robots — Profile</div>
+          <div class="muted" style="font-size:13px">2025 — Curated Collection</div>
         </div>
       </div>
 
-      <div style="font-weight:700;margin-bottom:8px">Selected Robot</div>
       <div id="profileCard">
-        <div style="font-size:13px;color:var(--muted);margin-bottom:8px">No model selected.</div>
+        <div class="muted">No model selected yet. Click a card to view full specs, demo the 3D preview and request a quote.</div>
       </div>
 
-      <div style="height:18px"></div>
-      <div style="font-weight:700;margin-bottom:8px">Contact & Actions</div>
-      <div style="display:flex;gap:8px;flex-direction:column">
-        <button id="inquiryBtn" style="padding:10px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),#60a5fa);cursor:pointer">Inquire / Get Quote</button>
-        <button id="compareBtn" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;cursor:pointer">Compare Selected</button>
-      </div>
-
+      <div style="height:14px"></div>
+      <button id="inquiryBtn" class="btn btn-primary" style="width:100%">Request Quote / Inquiry</button>
+      <div style="height:8px"></div>
+      <button id="compareBtn" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.04)">Compare Selected</button>
     </aside>
   </main>
 
-  <footer>Built with ❤️ • Replace sample images with high-res product images / GLB models for better 3D fidelity.</footer>
-
+  <footer>Electo Robots • 2025 • Demo dashboard</footer>
 
 <script>
-// ---------- SAMPLE DATA for 10 robots (replace image URLs with your own) ----------
+// ---------- DATA: 10 robots (replace img with high-res product photos or GLB URLs) ----------
 const robots = [
-  { id:1, name:'Axiom Home Assistant X1', category:'Home', price:1299, img:'https://images.unsplash.com/photo-1581091870622-3a7ec63b6c2b?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=1', desc:'Personal assistant for home chores, voice / vision, 8h battery', specs:{weight:'6.1 kg',battery:'8h',sensors:'LiDAR, RGB, IR'} },
-  { id:2, name:'Forge Fabricator F7', category:'Industrial', price:18999, img:'https://images.unsplash.com/photo-1581093588401-8a0f0c5c6f8a?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=2', desc:'Compact fabrication arm for small workshops, 6-axis', specs:{weight:'58 kg',payload:'7 kg',precision:'0.05 mm'} },
-  { id:3, name:'Scout Inspection Drone D3', category:'Aerial', price:3499, img:'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=3', desc:'Foldable inspection drone with thermal and zoom camera', specs:{weight:'1.3 kg',flight:'35 min',camera:'48 MP + thermal'} },
-  { id:4, name:'NurseCare Assist N2', category:'Healthcare', price:8999, img:'https://images.unsplash.com/photo-1581092795369-cda7e5f8b0d1?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=4', desc:'Assistance & monitoring robot for eldercare', specs:{weight:'22 kg',battery:'10h',features:'Vitals monitoring'} },
-  { id:5, name:'CargoMover CM-4', category:'Logistics', price:6999, img:'https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=5', desc:'Autonomous indoor delivery & tug robot', specs:{weight:'45 kg',payload:'120 kg',range:'120 km/day'} },
-  { id:6, name:'ChefBot C9', category:'Hospitality', price:4999, img:'https://images.unsplash.com/photo-1541532713592-79a0317b6b77?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=6', desc:'Kitchen robot for simple automated food prep', specs:{weight:'15 kg',power:'1.2 kW',features:'Recipe automation'} },
-  { id:7, name:'Guardian Security G1', category:'Security', price:2599, img:'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=7', desc:'Patrol rover for property monitoring, night vision', specs:{weight:'18 kg',range:'10 km',camera:'4K nightvision'} },
-  { id:8, name:'AquaSurvey AS-2', category:'Marine', price:11999, img:'https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=8', desc:'Autonomous surface vessel for lake and harbor surveys', specs:{weight:'34 kg',endurance:'12h',sensors:'Sonar, GPS'} },
-  { id:9, name:'RetailGuide R8', category:'Retail', price:1799, img:'https://images.unsplash.com/photo-1505765050965-8f5b041c4e7e?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=9', desc:'Store assistant for customers and inventory tasks', specs:{weight:'7 kg',battery:'9h',features:'POS integration'} },
-  { id:10, name:'LabAssist LA-5', category:'Research', price:7599, img:'https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=10', desc:'Precision pipetting and sample handler for labs', specs:{weight:'12 kg',precision:'0.02 ul',features:'Sterile enclosed'} }
+  {id:1,name:'Axiom Home Assistant X1',category:'Home',price:1299,img:'https://images.unsplash.com/photo-1605902711622-cfb43c44367e?q=80&w=1600&auto=format&fit=crop',desc:'Voice-enabled home assistant robot with object manipulation and vision.',specs:{weight:'6.1 kg',battery:'8 h',sensors:'LiDAR, RGB Camera'}},
+  {id:2,name:'Forge Fabricator F7',category:'Industrial',price:18999,img:'https://images.unsplash.com/photo-1581092160628-0b4f7a7a6a1f?q=80&w=1600&auto=format&fit=crop',desc:'6-axis fabrication arm for precision manufacturing and small-batch production.',specs:{weight:'58 kg',payload:'7 kg',precision:'0.05 mm'}},
+  {id:3,name:'Scout Inspection Drone D3',category:'Aerial',price:3499,img:'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1600&auto=format&fit=crop',desc:'Foldable inspection drone with thermal imaging and 4K zoom camera.',specs:{weight:'1.3 kg',flight:'35 min',camera:'48 MP + Thermal'}},
+  {id:4,name:'NurseCare Assist N2',category:'Healthcare',price:8999,img:'https://images.unsplash.com/photo-1580281657525-9f3d6e0f75f6?q=80&w=1600&auto=format&fit=crop',desc:'Patient-assist robot for vitals monitoring and mobility support.',specs:{weight:'22 kg',battery:'10 h',features:'Vitals monitoring, fall detection'}},
+  {id:5,name:'CargoMover CM-4',category:'Logistics',price:6999,img:'https://images.unsplash.com/photo-1504215680853-026ed2a45def?q=80&w=1600&auto=format&fit=crop',desc:'Autonomous indoor tug for warehouses and last-meter delivery.',specs:{weight:'45 kg',payload:'120 kg',range:'120 km/day'}},
+  {id:6,name:'ChefBot C9',category:'Hospitality',price:4999,img:'https://images.unsplash.com/photo-1515165562835-cb3e283a5b67?q=80&w=1600&auto=format&fit=crop',desc:'Automated kitchen assistant for recipe execution and plating.',specs:{weight:'15 kg',power:'1.2 kW',features:'Recipe automation'}},
+  {id:7,name:'Guardian Security G1',category:'Security',price:2599,img:'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?q=80&w=1600&auto=format&fit=crop',desc:'Mobile patrol rover with night vision and perimeter analytics.',specs:{weight:'18 kg',range:'10 km',camera:'4K NightVision'}},
+  {id:8,name:'AquaSurvey AS-2',category:'Marine',price:11999,img:'https://images.unsplash.com/photo-1505483531331-2b16b1b3f7fb?q=80&w=1600&auto=format&fit=crop',desc:'Autonomous surface vessel for hydrographic surveys and sampling.',specs:{weight:'34 kg',endurance:'12 h',sensors:'Sonar, GPS'}},
+  {id:9,name:'RetailGuide R8',category:'Retail',price:1799,img:'https://images.unsplash.com/photo-1524763051935-2f51d0b2e5b2?q=80&w=1600&auto=format&fit=crop',desc:'Interactive store assistant for shoppers and inventory tasks.',specs:{weight:'7 kg',battery:'9 h',features:'POS integration'}},
+  {id:10,name:'LabAssist LA-5',category:'Research',price:7599,img:'https://images.unsplash.com/photo-1581091215367-3a6d0b9bcc9c?q=80&w=1600&auto=format&fit=crop',desc:'Precision sample handler for laboratories with sterile enclosure.',specs:{weight:'12 kg',precision:'0.02 µL',features:'Closed sterile handling'}},
 ];
 
-// derive categories
+// categories
 const categories = Array.from(new Set(robots.map(r=>r.category)));
 
-// ---------- UI references ----------
+// UI refs
 const cardsGrid = document.getElementById('cardsGrid');
 const categoryChips = document.getElementById('categoryChips');
 const searchInput = document.getElementById('searchInput');
@@ -194,40 +160,28 @@ const clearBtn = document.getElementById('clearBtn');
 let activeCategory = null;
 let selectedRobot = null;
 
-// render category chips
+// render chips
 function renderChips(){
   categoryChips.innerHTML = '';
-  const all = document.createElement('div'); all.className='chip'; all.textContent='All';
-  all.onclick = ()=>{ activeCategory=null; renderCards(); highlightChip(); };
+  const all = document.createElement('div'); all.className='chip'; all.textContent='All'; all.onclick = ()=>{activeCategory=null;renderCards(); highlightChips()};
   categoryChips.appendChild(all);
-  categories.forEach(cat=>{
-    const c = document.createElement('div'); c.className='chip'; c.textContent=cat; c.onclick = ()=>{ activeCategory = cat; renderCards(); highlightChip(); };
-    categoryChips.appendChild(c);
-  });
+  categories.forEach(cat=>{ const c=document.createElement('div'); c.className='chip'; c.textContent=cat; c.onclick=()=>{activeCategory=cat; renderCards(); highlightChips()}; categoryChips.appendChild(c); });
 }
-function highlightChip(){
-  document.querySelectorAll('.chip').forEach(el=>{
-    el.style.borderColor = 'rgba(255,255,255,0.04)'; el.style.background='transparent';
-    if((activeCategory===null && el.textContent==='All') || el.textContent===activeCategory){ el.style.borderColor='rgba(110,231,183,0.3)'; el.style.background='rgba(110,231,183,0.05)'; }
-  });
-}
+function highlightChips(){ document.querySelectorAll('.chip').forEach(el=>{ el.style.background='transparent'; el.style.borderColor='rgba(255,255,255,0.04)'; if((activeCategory===null && el.textContent==='All')|| el.textContent===activeCategory){ el.style.background='rgba(126,242,200,0.06)'; el.style.borderColor='rgba(126,242,200,0.25)'; }});} 
 
 // render cards
 function renderCards(){
-  const query = searchInput.value.trim().toLowerCase();
+  const q = (searchInput.value||'').trim().toLowerCase();
   let list = robots.slice();
-  if(activeCategory) list = list.filter(r=>r.category===activeCategory);
-  if(query) list = list.filter(r=> (r.name+ ' ' + r.desc + ' ' + r.category).toLowerCase().includes(query));
+  if(activeCategory) list = list.filter(x=>x.category===activeCategory);
+  if(q) list = list.filter(x=>(x.name+' '+x.desc+' '+x.category).toLowerCase().includes(q));
   if(sortSel.value==='price-asc') list.sort((a,b)=>a.price-b.price);
   if(sortSel.value==='price-desc') list.sort((a,b)=>b.price-a.price);
 
-  cardsGrid.innerHTML = '';
+  cardsGrid.innerHTML='';
   list.forEach(r=>{
-    const card = document.createElement('div'); card.className='card';
-    card.innerHTML = `<div class="thumb"><img src="${r.img}" alt="${r.name}" loading="lazy"/></div>
-      <div class="meta"><div class="name">${r.name}</div>
-      <div class="cat">${r.category}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div class="price">$${r.price.toLocaleString()}</div><div style="font-size:12px;color:var(--muted)">ID ${r.id}</div></div></div>`;
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML = `<div class="thumb"><img src="${r.img}" alt="${r.name}" loading="lazy"/></div><div class="name">${r.name}</div><div class="cat">${r.category}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div class="price">$${r.price.toLocaleString()}</div><div class="muted">ID ${r.id}</div></div>`;
     card.onclick = ()=> loadRobot(r);
     cardsGrid.appendChild(card);
   });
@@ -238,95 +192,45 @@ function renderCards(){
   statCats.textContent = Array.from(new Set(list.map(x=>x.category))).join(', ');
 }
 
-// clear search
-clearBtn.onclick = ()=>{ searchInput.value=''; renderCards(); };
-searchInput.oninput = ()=> renderCards();
-sortSel.onchange = ()=> renderCards();
+clearBtn.onclick = ()=>{searchInput.value=''; renderCards();};
+searchInput.oninput = ()=> renderCards(); sortSel.onchange = ()=> renderCards();
 
-// initial render
-renderChips(); highlightChip(); renderCards();
+renderChips(); highlightChips(); renderCards();
 
-// ---------- Profile + Selected ----------
-function loadRobot(r){
-  selectedRobot = r;
-  selectedTitle.innerHTML = `<div style="font-weight:700">${r.name}</div><div style="color:var(--muted);font-size:13px">${r.category} • $${r.price.toLocaleString()}</div>`;
-  selectedDesc.innerHTML = `<div style="font-size:13px;color:var(--muted)">${r.desc}</div><div style="height:10px"></div><div style="font-size:13px">Specs:<ul style='margin:6px 0 0 16px;color:var(--muted)'><li>Weight: ${r.specs.weight}</li><li>${Object.entries(r.specs).filter(k=>k[0]!=='weight').map(k=>k[0]+': '+k[1]).join('</li><li>')}</li></ul></div>`;
-
-  profileCard.innerHTML = `<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px"><div style="width:100px;height:80px;border-radius:8px;overflow:hidden"><img src='${r.img}' style='width:100%;height:100%;object-fit:cover' alt='${r.name}'/></div><div><div style='font-weight:700'>${r.name}</div><div style='color:var(--muted);font-size:13px'>${r.category}</div></div></div><div style='font-size:14px;color:var(--muted);margin-bottom:8px'>Price: <span style='color:var(--accent);font-weight:700'>$${r.price.toLocaleString()}</span></div><div style='font-size:13px'>${r.desc}</div><div style='height:8px'></div><div style='font-size:13px;color:var(--muted)'>Detailed specs:</div><pre style='background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;margin-top:8px'>${JSON.stringify(r.specs, null, 2)}</pre>`;
-
-  // load into 3D viewer
-  setImageOn3DPlane(r.img);
-}
-
-// ---------- Three.js 3D viewer (maps selected image onto a rotating plane) ----------
-const canvasContainer = document.getElementById('viewerCanvas');
-let scene, camera, renderer, planeMesh, controls, light;
-let rotateEnabled = true;
-
+// ---------- 3D viewer (image -> textured plane) ----------
+const container = document.getElementById('viewerCanvas');
+let scene, camera, renderer, plane, controls;
 function init3D(){
   scene = new THREE.Scene();
-  const w = canvasContainer.clientWidth, h = Math.max(320, canvasContainer.clientHeight);
-  camera = new THREE.PerspectiveCamera(45, w/h, 0.1, 1000);
-  camera.position.set(0,0,6);
+  const W = container.clientWidth, H = Math.max(340, container.clientHeight);
+  camera = new THREE.PerspectiveCamera(45, W/H, 0.1, 1000); camera.position.set(0,0,6);
+  renderer = new THREE.WebGLRenderer({antialias:true, alpha:true}); renderer.setSize(W,H); renderer.setPixelRatio(window.devicePixelRatio || 1);
+  container.appendChild(renderer.domElement);
 
-  renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setSize(w,h);
-  renderer.setPixelRatio(window.devicePixelRatio?window.devicePixelRatio:1);
-  canvasContainer.appendChild(renderer.domElement);
+  const dir = new THREE.DirectionalLight(0xffffff, 1); dir.position.set(5,5,5); scene.add(dir);
+  const amb = new THREE.AmbientLight(0xffffff, 0.4); scene.add(amb);
 
-  // ambient
-  light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(5,5,5);
-  scene.add(light);
+  const geom = new THREE.PlaneGeometry(4,2.6); const mat = new THREE.MeshStandardMaterial({color:0x222222,metalness:0.2,roughness:0.5}); plane = new THREE.Mesh(geom,mat); scene.add(plane);
 
-  // plane placeholder
-  const geometry = new THREE.PlaneGeometry(4,2.6);
-  const material = new THREE.MeshStandardMaterial({color:0x222222, metalness:0.2, roughness:0.6});
-  planeMesh = new THREE.Mesh(geometry, material);
-  scene.add(planeMesh);
-
-  // controls
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enablePan = false; controls.enableZoom = true; controls.autoRotate = false;
-
+  controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enablePan=false; controls.autoRotate=false; controls.enableZoom=true;
   window.addEventListener('resize', onResize);
   animate();
 }
+function onResize(){ const W = container.clientWidth, H = Math.max(340, container.clientHeight); camera.aspect = W/H; camera.updateProjectionMatrix(); renderer.setSize(W,H); }
+function animate(){ requestAnimationFrame(animate); plane.rotation.y += 0.007; renderer.render(scene, camera); }
+function setImageOnPlane(url){ const loader = new THREE.TextureLoader(); loader.crossOrigin=''; loader.load(url, tex=>{ plane.material.map = tex; plane.material.needsUpdate=true; const aspect = tex.image.width/tex.image.height; if(aspect>1){ plane.scale.set(4,4/aspect,1);} else { plane.scale.set(4*aspect,4,1);} }, undefined, err=>{ console.warn('Texture load failed', err); }); }
 
-function onResize(){
-  const w = canvasContainer.clientWidth, h = Math.max(320, canvasContainer.clientHeight);
-  camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h);
-}
-
-function animate(){
-  requestAnimationFrame(animate);
-  if(rotateEnabled && planeMesh) planeMesh.rotation.y += 0.008;
-  renderer.render(scene, camera);
-}
-
-function setImageOn3DPlane(url){
-  const loader = new THREE.TextureLoader();
-  loader.crossOrigin = '';
-  loader.load(url, (tex)=>{
-    // update plane material
-    planeMesh.material.map = tex;
-    planeMesh.material.needsUpdate = true;
-    // adjust plane size to image aspect
-    const aspect = tex.image.width / tex.image.height;
-    planeMesh.scale.set(aspect>1?4:4*aspect, aspect>1?4/aspect:4, 1);
-    // small pop
-    planeMesh.rotation.set(0,0,0);
-  }, undefined, (err)=>{
-    console.warn('Image load error', err);
-  });
-}
-
-// init 3D on load
 init3D();
 
-// set first robot by default
-loadRobot(robots[0]);
+// load robot into profile + 3D viewer
+function loadRobot(r){ selectedRobot = r; selectedTitle.innerHTML = `<div style="font-weight:800">${r.name}</div><div class="muted" style="margin-top:6px">${r.category} • $${r.price.toLocaleString()}</div>`;
+  selectedDesc.innerHTML = `<div class="muted">${r.desc}</div><div style="height:8px"></div><div style="font-weight:700;margin-bottom:6px">Specs</div><pre style="background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;color:var(--muted);">${JSON.stringify(r.specs,null,2)}</pre>`;
+  profileCard.innerHTML = `<div style="margin-bottom:10px"><img src='${r.img}' alt='${r.name}'/></div><div style='font-weight:800'>${r.name}</div><div class='muted'>${r.category}</div><div style='height:8px'></div><div style='font-weight:800;color:var(--accent)'>$${r.price.toLocaleString()}</div><div style='height:8px'></div><button class='btn btn-primary' style='width:100%;margin-top:10px'>Request Quote</button>`;
+  setImageOnPlane(r.img);
+}
 
+// default selection
+loadRobot(robots[0]);
 </script>
 </body>
 </html>
